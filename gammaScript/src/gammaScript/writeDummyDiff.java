@@ -149,7 +149,7 @@ public class writeDummyDiff {
 					//result += inputLine;
 				}
 				else if(getParam(inputLine,"range_samp_2:*",0)!= null){
-					fw.write("range_samp_2:	"+getMli(mli,"azimuth_lines:*",1));
+					fw.write("range_samp_2:	"+getMli(mli,"range_samples:*",1));
 					fw.write("\n");
 				}
 				else if(getParam(inputLine,"az_samp_1:*",0)!= null){

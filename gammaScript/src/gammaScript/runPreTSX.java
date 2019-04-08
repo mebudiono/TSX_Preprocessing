@@ -26,21 +26,22 @@ import java.util.regex.Pattern;
 //###
 //###########################################################################
 public class runPreTSX {
-	public static String outputDirName="/media/rossendra/01D23527E552C810/TSX/OUTPUT_TES/";
-	public static String inputDirName="/media/rossendra/01D23527E552C810/TSX/input/";
+	public static String outputDirName="/media/rossendra/01D23527E552C810/TSX/out_sulbar2/";
+	public static String inputDirName="/media/rossendra/01D23527E552C810/TSX/sulbar/";
 	public static String demPath="/media/rossendra/01D23527E552C810/TSX/DEMIND/indonesia_SRTM30_rev1.tif";
+	public static String geoDir="/usr/local/GAMMA_SOFTWARE-20181130/GEO/bin/";
+	public static String scriptDir="/usr/local/scripts/";
+	public static String dispDir="/usr/local/GAMMA_SOFTWARE-20181130/DISP/bin/";
 	//public  String outputDir="/media/Data/TSX/OUTPUT/";
 	public  int foundDIrInput;
-	protected String xmlFile;
-	protected static String fileOutputName;
-	protected String cosFile;
-	protected static String outputMakeDir,mlirs;
+	protected static String outputMakeDir,mlirs,fileOutputName,xmlFile,cosFile,namePath;
 	public static double parSRes=6;
 	public  ArrayList<String> listDir,listXML ;
 	public static ArrayList<String> listCommand;
 	public ArrayList<String> dapetXML;
 	public ArrayList<String> dapetCOS;
-	public double dem_width,mli_width;
+	public Integer dem_width,mli_width;
+	public FileWriter writeDiffOut;
 	//public ArrayList<String> outputMakeDir;
 
 	//List folder inside inputDirName, convert the name and find xml and cosar,
@@ -107,9 +108,15 @@ public class runPreTSX {
 			} catch (IOException e) {
 				System.out.println(e);
 			}
+			String parPath=namePath+".mli.par";
+			//
+			//
+			int satu=1;
+			//
+			mlirs=getParam(parPath,"range_samples*",satu);
 			listCommand=new ArrayList<String>();
 
-			listCommand.add("/usr/local/GAMMA_SOFTWARE-20181130/GEO/bin/SLC_corners "+outputDirName+outputMakeDir+fileOutputName+".slc.par");
+			listCommand.add(geoDir+"SLC_corners "+namePath+".slc.par");
 			try {
 				//Process p=new Process();
 
@@ -120,7 +127,7 @@ public class runPreTSX {
 							new BufferedReader(new InputStreamReader(p.getInputStream()));
 					//BufferedWriter bw = null;
 					String inputLine;
-					File corners = new File(outputDirName+outputMakeDir+fileOutputName+".corners.txt");
+					File corners = new File(namePath+".corners.txt");
 					FileWriter fw = new FileWriter(corners);
 					//bw = new BufferedWriter(fw);
 					while ((inputLine = in.readLine()) != null) {
@@ -187,8 +194,8 @@ public class runPreTSX {
 
 			listCommand=new ArrayList<String>();
 			geoCode3();
-			writeDummyDiff coba=new writeDummyDiff(outputDirName+outputMakeDir+fileOutputName+".mli.par",
-					outputDirName+outputMakeDir+fileOutputName+".diff_par","/media/rossendra/01D23527E552C810/TSX/diff_par_template");
+			writeDummyDiff coba=new writeDummyDiff(namePath+".mli.par",
+					namePath+".diff_par","/media/rossendra/01D23527E552C810/TSX/diff_par_template");
 			coba.process();
 			try {
 				//Process p=new Process();
@@ -206,133 +213,156 @@ public class runPreTSX {
 					}
 					in.close();
 				}
-				listCommand=new ArrayList<String>();
-				geoCode4();
-				try {
-					//Process p=new Process();
-
-					for (int e=0;e<listCommand.size();e++) {
-						Runtime r = Runtime.getRuntime();                    
-						Process p = r.exec(listCommand.get(e));	
-						BufferedReader in =
-								new BufferedReader(new InputStreamReader(p.getInputStream()));
-						String inputLine;
-						while ((inputLine = in.readLine()) != null) {
-
-							System.out.println(inputLine);
-							result += inputLine;
-						}
-						in.close();
+			} catch (IOException e) {
+				System.out.println(e);
+			}
+			listCommand=new ArrayList<String>();
+			geoCode32();
+			try {
+				//Process p=new Process();
+				writeDiffOut = new FileWriter(namePath+".diff_par.out");
+				for (int f=0;f<listCommand.size();f++) {
+					Runtime r = Runtime.getRuntime();                    
+					Process p = r.exec(listCommand.get(f));	
+					BufferedReader in =
+							new BufferedReader(new InputStreamReader(p.getInputStream()));
+					String inputLine;
+					while ((inputLine = in.readLine()) != null) {
+						writeDiffOut.write(inputLine);
+						writeDiffOut.write("\n");
+						System.out.println(inputLine);
+						result += inputLine;
 					}
-				} catch (IOException e) {
-					System.out.println(e);
+					in.close();
 				}
-				listCommand=new ArrayList<String>();
-				geoCode5();
-				try {
-					//Process p=new Process();
-					FileWriter fw = new FileWriter(outputDirName+outputMakeDir+fileOutputName+".diff_par.out");
-					for (int e=0;e<listCommand.size();e++) {
-						Runtime r = Runtime.getRuntime();                    
-						Process p = r.exec(listCommand.get(e));	
-						BufferedReader in =
-								new BufferedReader(new InputStreamReader(p.getInputStream()));
-						String inputLine;
-						while ((inputLine = in.readLine()) != null) {
-							fw.write(inputLine);
-							fw.write("\n");
-							System.out.println(inputLine);
-							result += inputLine;
-						}
-						in.close();
-						fw.close();
+			} catch (IOException e) {
+				System.out.println(e);
+			}
+			listCommand=new ArrayList<String>();
+			geoCode4();
+			try {
+				//Process p=new Process();
+
+				for (int e=0;e<listCommand.size();e++) {
+					Runtime r = Runtime.getRuntime();                    
+					Process p = r.exec(listCommand.get(e));	
+					BufferedReader in =
+							new BufferedReader(new InputStreamReader(p.getInputStream()));
+					String inputLine;
+					while ((inputLine = in.readLine()) != null) {
+
+						System.out.println(inputLine);
+						result += inputLine;
 					}
-				} catch (IOException e) {
-					System.out.println(e);
+					in.close();
 				}
-				listCommand=new ArrayList<String>();
-				geoCode6();
-				try {
-					//Process p=new Process();
-
-					for (int e=0;e<listCommand.size();e++) {
-						Runtime r = Runtime.getRuntime();                    
-						Process p = r.exec(listCommand.get(e));	
-						BufferedReader in =
-								new BufferedReader(new InputStreamReader(p.getInputStream()));
-						String inputLine;
-						while ((inputLine = in.readLine()) != null) {
-
-							System.out.println(inputLine);
-							result += inputLine;
-						}
-						in.close();
+			} catch (IOException e) {
+				System.out.println(e);
+			}
+			listCommand=new ArrayList<String>();
+			geoCode5();
+			try {
+				//Process p=new Process();
+				//FileWriter fw = new FileWriter(namePath+".diff_par.out");
+				for (int e=0;e<listCommand.size();e++) {
+					Runtime r = Runtime.getRuntime();                    
+					Process p = r.exec(listCommand.get(e));	
+					BufferedReader in =
+							new BufferedReader(new InputStreamReader(p.getInputStream()));
+					String inputLine;
+					while ((inputLine = in.readLine()) != null) {
+						writeDiffOut.write(inputLine);
+						writeDiffOut.write("\n");
+						System.out.println(inputLine);
+						result += inputLine;
 					}
-				} catch (IOException e) {
-					System.out.println(e);
+					in.close();
+					
+					writeDiffOut.close();
 				}
-				listCommand=new ArrayList<String>();
-				geoCode7();
-				try {
-					//Process p=new Process();
+			} catch (IOException e) {
+				System.out.println(e);
+			}
+			listCommand=new ArrayList<String>();
+			geoCode6();
+			try {
+				//Process p=new Process();
 
-					for (int e=0;e<listCommand.size();e++) {
-						Runtime r = Runtime.getRuntime();                    
-						Process p = r.exec(listCommand.get(e));	
-						BufferedReader in =
-								new BufferedReader(new InputStreamReader(p.getInputStream()));
-						String inputLine;
-						while ((inputLine = in.readLine()) != null) {
+				for (int e=0;e<listCommand.size();e++) {
+					Runtime r = Runtime.getRuntime();                    
+					Process p = r.exec(listCommand.get(e));	
+					BufferedReader in =
+							new BufferedReader(new InputStreamReader(p.getInputStream()));
+					String inputLine;
+					while ((inputLine = in.readLine()) != null) {
 
-							System.out.println(inputLine);
-							result += inputLine;
-						}
-						in.close();
+						System.out.println(inputLine);
+						result += inputLine;
 					}
-				} catch (IOException e) {
-					System.out.println(e);
+					in.close();
 				}
-				listCommand=new ArrayList<String>();
-				geoCode8();
-				try {
-					//Process p=new Process();
+			} catch (IOException e) {
+				System.out.println(e);
+			}
+			listCommand=new ArrayList<String>();
+			geoCode7();
+			try {
+				//Process p=new Process();
 
-					for (int e=0;e<listCommand.size();e++) {
-						Runtime r = Runtime.getRuntime();                    
-						Process p = r.exec(listCommand.get(e));	
-						BufferedReader in =
-								new BufferedReader(new InputStreamReader(p.getInputStream()));
-						String inputLine;
-						while ((inputLine = in.readLine()) != null) {
+				for (int e=0;e<listCommand.size();e++) {
+					Runtime r = Runtime.getRuntime();                    
+					Process p = r.exec(listCommand.get(e));	
+					BufferedReader in =
+							new BufferedReader(new InputStreamReader(p.getInputStream()));
+					String inputLine;
+					while ((inputLine = in.readLine()) != null) {
 
-							System.out.println(inputLine);
-							result += inputLine;
-						}
-						in.close();
+						System.out.println(inputLine);
+						result += inputLine;
 					}
-				} catch (IOException e) {
-					System.out.println(e);
+					in.close();
 				}
-				listCommand=new ArrayList<String>();
-				geoCode9();
-				try {
-					//Process p=new Process();
+			} catch (IOException e) {
+				System.out.println(e);
+			}
+			listCommand=new ArrayList<String>();
+			geoCode8();
+			try {
+				//Process p=new Process();
 
-					for (int e=0;e<listCommand.size();e++) {
-						Runtime r = Runtime.getRuntime();                    
-						Process p = r.exec(listCommand.get(e));	
-						BufferedReader in =
-								new BufferedReader(new InputStreamReader(p.getInputStream()));
-						String inputLine;
-						while ((inputLine = in.readLine()) != null) {
+				for (int e=0;e<listCommand.size();e++) {
+					Runtime r = Runtime.getRuntime();                    
+					Process p = r.exec(listCommand.get(e));	
+					BufferedReader in =
+							new BufferedReader(new InputStreamReader(p.getInputStream()));
+					String inputLine;
+					while ((inputLine = in.readLine()) != null) {
 
-							System.out.println(inputLine);
-							result += inputLine;
-						}
-						in.close();
+						System.out.println(inputLine);
+						result += inputLine;
 					}
-				} catch (IOException e) {
-					System.out.println(e);
+					in.close();
+				}
+			} catch (IOException e) {
+				System.out.println(e);
+			}
+			listCommand=new ArrayList<String>();
+			geoCode9();
+			try {
+				//Process p=new Process();
+
+				for (int e=0;e<listCommand.size();e++) {
+					Runtime r = Runtime.getRuntime();                    
+					Process p = r.exec(listCommand.get(e));	
+					BufferedReader in =
+							new BufferedReader(new InputStreamReader(p.getInputStream()));
+					String inputLine;
+					while ((inputLine = in.readLine()) != null) {
+
+						System.out.println(inputLine);
+						result += inputLine;
+					}
+					in.close();
 				}
 			} catch (IOException e) {
 				System.out.println(e);
@@ -342,99 +372,107 @@ public class runPreTSX {
 	}
 
 	public void geoCode1(){
-		double minLat=Double.valueOf(getParam(outputDirName+outputMakeDir+fileOutputName+".corners.txt","min.*latitude*:*",3))-0.05;
-		double maxLat=Double.valueOf(getParam(outputDirName+outputMakeDir+fileOutputName+".corners.txt","min.*latitude*:*",7))+0.05;
-		double minLon=Double.valueOf(getParam(outputDirName+outputMakeDir+fileOutputName+".corners.txt","min.*longitude*:*",3))-0.05;
-		double maxLon=Double.valueOf(getParam(outputDirName+outputMakeDir+fileOutputName+".corners.txt","min.*longitude*:*",7))+0.05;
-		listCommand.add("/usr/local/scripts/srtm_gamma2 "+demPath+" "
-				+outputDirName+outputMakeDir+fileOutputName+".dem.bin "+minLon+" "+maxLat+" "+maxLon+" "+minLat);
+		double minLat=Double.valueOf(getParam(namePath+".corners.txt","min.*latitude*:*",3))-0.05;
+		double maxLat=Double.valueOf(getParam(namePath+".corners.txt","min.*latitude*:*",7))+0.05;
+		double minLon=Double.valueOf(getParam(namePath+".corners.txt","min.*longitude*:*",3))-0.05;
+		double maxLon=Double.valueOf(getParam(namePath+".corners.txt","min.*longitude*:*",7))+0.05;
+		listCommand.add(scriptDir+"srtm_gamma2 "+demPath+" "
+				+namePath+".dem.bin "+minLon+" "+maxLat+" "+maxLon+" "+minLat);
 
 	}
 
 	public void geoCode2(){
 
 
-		double demGrid=Double.valueOf(getParam(outputDirName+outputMakeDir+fileOutputName+".dem.par","post_lon:*",1))*1852*60;
+		double demGrid=Double.valueOf(getParam(namePath+".dem.par","post_lon:*",1))*1852*60;
 		double ovr=demGrid/parSRes;
-		listCommand.add("/usr/local/GAMMA_SOFTWARE-20181130/GEO/bin/gc_map "+outputDirName+outputMakeDir+fileOutputName+".mli.par - "
-				+outputDirName+outputMakeDir+fileOutputName+".dem.par "+outputDirName+outputMakeDir+fileOutputName+".dem.bin "
-				+outputDirName+outputMakeDir+fileOutputName+".demseg.par "+
-				outputDirName+outputMakeDir+fileOutputName+".demseg.bin "+outputDirName+outputMakeDir+fileOutputName+".lut "+ovr+" "+ovr+" "
-				+outputDirName+outputMakeDir+fileOutputName+".sim.bin "+outputDirName+outputMakeDir+fileOutputName+".zen.bin "+
-				outputDirName+outputMakeDir+fileOutputName+".ori.bin - - - - 8 2");
+		listCommand.add(geoDir+"gc_map "+namePath+".mli.par - "
+				+namePath+".dem.par "+namePath+".dem.bin "
+				+namePath+".demseg.par "+
+				namePath+".demseg.bin "+namePath+".lut "+ovr+" "+ovr+" "
+				+namePath+".sim.bin "+namePath+".zen.bin "+
+				namePath+".ori.bin - - - - 8 2");
 
 	}
 	public void geoCode3(){
-		mli_width=Double.valueOf(getParam(outputDirName+outputMakeDir+fileOutputName+".mli.par","range_samples:*",1));
-		double mli_lines=Double.valueOf(getParam(outputDirName+outputMakeDir+fileOutputName+".mli.par","azimuth_lines:*",1));
-		dem_width=Double.valueOf(getParam(outputDirName+outputMakeDir+fileOutputName+".demseg.par","width:*",1));
-		//double dem_lines=Double.valueOf(getParam(outputDirName+outputMakeDir+fileOutputName+".demseg.par","nlines:*",1));
+		mli_width=Integer.valueOf(getParam(namePath+".mli.par","range_samples:*",1));
+		Integer mli_lines=Integer.valueOf(getParam(namePath+".mli.par","azimuth_lines:*",1));
+		dem_width=Integer.valueOf(getParam(namePath+".demseg.par","width:*",1));
+		//double dem_lines=Double.valueOf(getParam(namePath+".demseg.par","nlines:*",1));
 		//geocode $lut $simsar $dem_width $simsar_rdc $mli_width $mli_lines 0 0
-		listCommand.add("/usr/local/GAMMA_SOFTWARE-20181130/GEO/bin/geocode "+outputDirName+outputMakeDir+fileOutputName+".lut "
-				+outputDirName+outputMakeDir+fileOutputName+".sim.bin "+dem_width+" "+outputDirName+outputMakeDir+fileOutputName+".sim_rdc.bin "
+		listCommand.add(geoDir+"geocode "+namePath+".lut "
+				+namePath+".sim.bin "+dem_width+" "+namePath+".sim_rdc.bin "
 				+mli_width+" "+mli_lines+" 0 0");
 	}
+
+	public void geoCode32(){
+		//	init_offsetm $simsar_rdc $gamma.bin $diff_par - - - - - - $coreg_snr 1024 1 > $diff_par.out
+
+		listCommand.add(geoDir+"init_offsetm "+namePath+".sim_rdc.bin "
+				+namePath+".gamma.bin "
+				+namePath+".diff_par - - - - - - 0.15 1024 1");
+	}
 	public void geoCode4(){
-		try{
-			FileWriter fw = new FileWriter(outputDirName+outputMakeDir+fileOutputName+".diff_par.out");
-			fw.write("*** Initial offset estimation for multi-look intensity images ***");
-			fw.write("\n");
-			fw.write("*** Copyright 2016, Gamma Remote Sensing, v3.9 12-Apr-2016 clw/uw ***");
-			fw.write("\n");
-			fw.close();
+		//		try{
+		//			FileWriter fw = new FileWriter(namePath+".diff_par.out");
+		//			fw.write("*** Initial offset estimation for multi-look intensity images ***");
+		//			fw.write("\n");
+		//			fw.write("*** Copyright 2016, Gamma Remote Sensing, v3.9 12-Apr-2016 clw/uw ***");
+		//			fw.write("\n");
+		//			fw.close();
+		//
+		//		} catch (IOException e) {
+		//			System.out.println(e);
+		//		}
 
-		} catch (IOException e) {
-			System.out.println(e);
-		}
 
-
-		listCommand.add("/usr/local/GAMMA_SOFTWARE-20181130/GEO/bin/offset_pwrm "+outputDirName+outputMakeDir+fileOutputName+".sim_rdc.bin "
-				+outputDirName+outputMakeDir+fileOutputName+".mli.bin "+outputDirName+outputMakeDir+fileOutputName+".diff_par "
-				+outputDirName+outputMakeDir+fileOutputName+".offs "+outputDirName+outputMakeDir+fileOutputName+".snr 128 128 "
-				+outputDirName+outputMakeDir+fileOutputName+".offsets 1 64 64 -");
+		listCommand.add(geoDir+"offset_pwrm "+namePath+".sim_rdc.bin "
+				+namePath+".mli.bin "+namePath+".diff_par "
+				+namePath+".offs "+namePath+".snr 128 128 "
+				+namePath+".offsets 1 64 64 -");
 	}
 
 	public void geoCode5(){
 		//offset_fitm $output/$line/$nameid.offs $output/$line/$nameid.snr $diff_par $output/$line/$nameid.coffs $output/$line/$nameid.coffsets - 3 > $diff_par.out
-		listCommand.add("/usr/local/GAMMA_SOFTWARE-20181130/GEO/bin/offset_fitm "+outputDirName+outputMakeDir+fileOutputName+".offs "
-				+outputDirName+outputMakeDir+fileOutputName+".snr "+outputDirName+outputMakeDir+fileOutputName+".diff_par "
-				+outputDirName+outputMakeDir+fileOutputName+".coffs "+outputDirName+outputMakeDir+fileOutputName+".coffsets ");
+		listCommand.add(geoDir+"offset_fitm "+namePath+".offs "
+				+namePath+".snr "+namePath+".diff_par "
+				+namePath+".coffs "+namePath+".coffsets ");
 	}
 	public void geoCode6(){
 		//gc_map_fine $lut $dem_width $diff_par $lutf 1
-		listCommand.add("/usr/local/GAMMA_SOFTWARE-20181130/GEO/bin/gc_map_fine "+outputDirName+outputMakeDir+fileOutputName+".lut "+
-		dem_width+" "+outputDirName+outputMakeDir+fileOutputName+".diff_par "
-				+outputDirName+outputMakeDir+fileOutputName+".lutf 1");
-		
+		listCommand.add(geoDir+"gc_map_fine "+namePath+".lut "+
+				dem_width+" "+namePath+".diff_par "
+				+namePath+".lutf 1");
+
 	}
 	public void geoCode7(){
-		
+
 		//geocode_back $imfile $mli_width $lutf $gtc.bin $dem_width 0 2 0
-		listCommand.add("/usr/local/GAMMA_SOFTWARE-20181130/GEO/bin/geocode_back "+outputDirName+outputMakeDir+fileOutputName+".cmli.bin "
-				+mli_width+" "+outputDirName+outputMakeDir+fileOutputName+".lutf "+outputDirName+outputMakeDir+fileOutputName+".cmli.GTC.bin "
+		listCommand.add(geoDir+"geocode_back "+namePath+".cmli.bin "
+				+mli_width+" "+namePath+".lutf "+namePath+".cmli.GTC.bin "
 				+dem_width+" 0 2 0");
 	}
-public void geoCode8(){
-		
+	public void geoCode8(){
+
 		//gamma2envi $demsegpar $gtc.hdr
-		listCommand.add("/usr/local/scripts/gamma2envi "+outputDirName+outputMakeDir+fileOutputName+".demseg.par "
-				+outputDirName+outputMakeDir+fileOutputName+".cmli.GTC.hdr");
+		listCommand.add(scriptDir+"gamma2envi "+namePath+".demseg.par "
+				+namePath+".cmli.GTC.hdr");
 		//raspwr $output/$line/$id*.cmli.bin $mlirs 1 0 1 1 - - - $output/$line/$nameid.cmli.ras
-		listCommand.add("/usr/local/GAMMA_SOFTWARE-20181130/DISP/bin/raspwr "+outputDirName+outputMakeDir+fileOutputName+".cmli.bin "
-				+mlirs+" 1 0 1 1 - - - "+outputDirName+outputMakeDir+fileOutputName+".cmli.ras");
-		
+		listCommand.add(dispDir+"raspwr "+namePath+".cmli.bin "
+				+mlirs+" 1 0 1 1 - - - "+namePath+".cmli.ras");
+
 	}
-public void geoCode9(){
-	
-	
-	//geocode_back $output/$line/$id*.cmli.ras $mlirs $output/$line/$id*.lutf $gtc.image.bmp $dem_width - 0 2
-	listCommand.add("/usr/local/GAMMA_SOFTWARE-20181130/GEO/bin/geocode_back "+outputDirName+outputMakeDir+fileOutputName+".cmli.ras "
-			+mlirs+" "+outputDirName+outputMakeDir+fileOutputName+".lutf "+outputDirName+outputMakeDir+fileOutputName+".cmli.GTC.image.bmp "
-			+dem_width+"  - 0 2");
-}
+	public void geoCode9(){
+
+
+		//geocode_back $output/$line/$id*.cmli.ras $mlirs $output/$line/$id*.lutf $gtc.image.bmp $dem_width - 0 2
+		listCommand.add(geoDir+"geocode_back "+namePath+".cmli.ras "
+				+mlirs+" "+namePath+".lutf "+namePath+".cmli.GTC.image.bmp "
+				+dem_width+" - 0 2");
+	}
 	//offset_pwrm $simsar_rdc $mli $diff_par $output/$line/$nameid.offs $output/$line/$nameid.snr 128 128 $output/$line/$nameid.offsets 1 64 64 -
-	
-	
+
+
 	public static ArrayList<String> geoCodeTest(String path,String demPath){
 		listCommand=new ArrayList<String>();
 		double minLat=Double.valueOf(getParam(path,"min.*latitude*:*",3))-0.05;
@@ -512,31 +550,13 @@ public void geoCode9(){
 		}
 
 		fileName(nameSplit);
-		listCommand.add("/usr/local/GAMMA_SOFTWARE-20181130/GEO/bin/par_TX_SLC "+xmlFile+" "+cosFile+" "
-				+outputDirName+outputMakeDir+fileOutputName+".slc.par "+outputDirName+outputMakeDir+fileOutputName+".slc.bin HH");
+		namePath=outputDirName+outputMakeDir+fileOutputName;
+		listCommand.add(geoDir+"par_TX_SLC "+xmlFile+" "+cosFile+" "
+				+namePath+".slc.par "+namePath+".slc.bin HH");
 
 	}
 
 
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
 	public static  String getParam(String parPath,String regex,int column){
 		BufferedReader reader;
 		String found;
@@ -588,12 +608,12 @@ public void geoCode9(){
 	}
 
 	public void mliParam() {
-		String parPath=outputDirName+outputMakeDir+fileOutputName+".slc.par";
-
-
+		String parPath=namePath+".slc.par";
+		//
+		//
 		int satu=1;
-
-		mlirs=getParam(parPath,"range_samples*",satu);
+		//
+		//		mlirs=getParam(parPath,"range_samples*",satu);
 		String parInc=getParam(parPath,"incidence_angle*",satu);
 		String parRPix=getParam(parPath,"range_pixel_spacing*",satu);
 		String parAPix=getParam(parPath,"azimuth_pixel_spacing*",satu);
@@ -618,250 +638,21 @@ public void geoCode9(){
 			parAzlks=1;
 		}
 		if(parRlks>=1||parAzlks>=1) {
-			listCommand.add("/usr/local/GAMMA_SOFTWARE-20181130/GEO/bin/multi_look "+outputDirName+outputMakeDir+fileOutputName+".slc.bin "
-					+outputDirName+outputMakeDir+fileOutputName+".slc.par "+outputDirName+outputMakeDir+fileOutputName+".mli.bin "
-					+outputDirName+outputMakeDir+fileOutputName+".mli.par "+parRlks+" "+parAzlks);
+			listCommand.add(geoDir+"multi_look "+namePath+".slc.bin "
+					+namePath+".slc.par "+namePath+".mli.bin "
+					+namePath+".mli.par "+parRlks+" "+parAzlks);
 			//listCommand.add(parRlks+" "+parAzlks);
-			listCommand.add("/usr/local/scripts/gamma2envi "+outputDirName+outputMakeDir+fileOutputName+".mli.par");
+			listCommand.add(scriptDir+"gamma2envi "+namePath+".mli.par");
 		}
-		listCommand.add("/usr/local/GAMMA_SOFTWARE-20181130/GEO/bin/radcal_MLI "+outputDirName+outputMakeDir+fileOutputName+".mli.bin "
-				+outputDirName+outputMakeDir+fileOutputName+".slc.par - "+outputDirName+outputMakeDir+fileOutputName+".cmli.bin - 0 0 1 0.0 -");
-		listCommand.add("/usr/local/GAMMA_SOFTWARE-20181130/GEO/bin/SLC_corners "+outputDirName+outputMakeDir+fileOutputName+".slc.par >"
-				+outputDirName+outputMakeDir+fileOutputName+".corners.txt");
+		listCommand.add(geoDir+"radcal_MLI "+namePath+".mli.bin "
+				+namePath+".slc.par - "+namePath+".cmli.bin - 0 0 1 0.0 -");
+		listCommand.add(geoDir+"SLC_corners "+namePath+".slc.par >"
+				+namePath+".corners.txt");
 		//return commandMLI.toString();
 		//return parInc;
 
 	}
 
-	//
-	//
-	//
-	//	public  String findOutputName(String path){
-	//
-	//		//String outputDir="/home/eucliwood/Documents/TSX/OUTPUT/";
-	//		File dir=new File(path);
-	//		File[] isiDir=dir.listFiles();
-	//
-	//		for(int i=0;i<isiDir.length;i++) {
-	//			if(isiDir[i].isDirectory()&&isiDir[i].exists()) {
-	//				//	System.out.printf("Dir isiDir%d=%s%n",i,isiDir[i].toString());
-	//				foundDIrInput=i;
-	//			}
-	//		}
-	//		String regex2 = "T.X1_SAR.*";
-	//		//private  final String INPUT = "cat cat cat cattie cat";
-	//		//		//String text    =
-	//		//				"This is the text to be searched " +
-	//		//						"for occurrences of the http:// pattern.";
-	//		//String text3="/home/eucliwood/Documents/TDX1/input/TDX1_SAR__SSC______SM_S_SRA_20180308T101947_20180308T101957";
-	//
-	//		//String text5="/home/eucliwood/Documents/TDX1/input/TDX1_SAR__SSC______SM_S_SRA_20180308T101947_20180308T101957";
-	//
-	//		//String text2=isiDir[1].toString();
-	//		Pattern p = Pattern.compile(regex2);
-	//		Matcher m = p.matcher(isiDir[foundDIrInput].toString());   // get a matcher object
-	//		//System.out.println("isidir= "+isiDir[1].toString());
-	//		String[] cut=new String[10];
-	//		//		int count=0;
-	//		while (m.find()){
-	//			//	
-	//			//	
-	//			//	System.out.println("m.group="+m.group(count));
-	//			//	//count++;
-	//			//}
-	//			//System.out.println(m.group(0).toString());
-	//			cut=m.group(0).split("_");
-	//			outputDirName=m.group(0);
-	//			//			for(int i=0;i<cut.length;i++) {
-	//			//				System.out.println(cut[i]);
-	//			//			}
-	//		}	//			System.out.println("isidir= "+m.group(0));
-	//		//			System.out.println(cut[cut.length-1]);
-	//		String dirOutput=outputDir+outputDirName;
-	//		String a=dirOutput+"/"+cut[0]+"_"+cut[1]+"-"+cut[cut.length-1]+"-HH";
-	//		return a;
-	//
-	//	}
-	//
-	//	public  String findOutputNameSLC(String path){
-	//
-	//		//String outputDir="/home/eucliwood/Documents/TSX/OUTPUT/";
-	//		File dir=new File(path);
-	//		File[] isiDir=dir.listFiles();
-	//
-	//		for(int i=0;i<isiDir.length;i++) {
-	//			if(isiDir[i].isDirectory()&&isiDir[i].exists()) {
-	//				System.out.printf("Dir isiDir%d=%s%n",i,isiDir[i].toString());
-	//				foundDIrInput=i;
-	//			}
-	//		}
-	//		String regex2 = "T.X1_SAR.*";
-	//		//private  final String INPUT = "cat cat cat cattie cat";
-	//		//		//String text    =
-	//		//				"This is the text to be searched " +
-	//		//						"for occurrences of the http:// pattern.";
-	//		//String text3="/home/eucliwood/Documents/TDX1/input/TDX1_SAR__SSC______SM_S_SRA_20180308T101947_20180308T101957";
-	//
-	//		//String text5="/home/eucliwood/Documents/TDX1/input/TDX1_SAR__SSC______SM_S_SRA_20180308T101947_20180308T101957";
-	//
-	//		//String text2=isiDir[1].toString();
-	//		Pattern p = Pattern.compile(regex2);
-	//		Matcher m = p.matcher(isiDir[foundDIrInput].toString());   // get a matcher object
-	//		//System.out.println("isidir= "+isiDir[1].toString());
-	//		String[] cut=new String[10];
-	//		//		int count=0;
-	//		while (m.find()){
-	//			//	
-	//			//	
-	//			//	System.out.println("m.group="+m.group(count));
-	//			//	//count++;
-	//			//}
-	//			System.out.println(m.group(0).toString());
-	//			cut=m.group(0).split("_");
-	//			outputDirName=m.group(0);
-	//			//			for(int i=0;i<cut.length;i++) {
-	//			//				System.out.println(cut[i]);
-	//			//			}
-	//		}	//			System.out.println("isidir= "+m.group(0));
-	//		//			System.out.println(cut[cut.length-1]);
-	//		String dirOutput=outputDir+outputDirName;
-	//		String a=dirOutput+"/"+cut[0]+"_"+cut[1]+"-"+cut[cut.length-1]+".slc.bin HH";
-	//
-	//		return a;
-	//
-	//	}
-	//
-	//
-	//	public  ArrayList<String> findDir(String path){
-	//		//List folder inside
-	//		File dir=new File(path);
-	//		File[] isiDir=dir.listFiles();
-	//
-	//		for(int i=0;i<isiDir.length;i++) {
-	//			if(isiDir[i].isDirectory()&&isiDir[i].exists()) {
-	//				//System.out.printf("Dir isiDir%d=%s%n",i,isiDir[i].toString());
-	//				listDir.add(isiDir[i].toString());
-	//				//foundDIrInput=i;
-	//				try {
-	//					//split listDir first,get last part
-	//					//List<String> nameSplit=new ArrayList<String>() ;
-	//					//for(int a=0;a<)
-	//					String[] splitPath= isiDir[i].toString().split("\\/");
-	//					List<String> nameSplit=(ArrayList<String>) Arrays.asList(splitPath); 
-	//					//List<String> nameSplit=Arrays.asList(splitPath); 
-	//					// List<String> wordList = Arrays.asList(words); 
-	//					//###############################################################################
-	//					//#https://stackoverflow.com/questions/46502937/arraystoreexception-when-trying-to-collect-files-into-array-via-files-walk?noredirect=1&lq=1   #
-	//					//###############################################################################	
-	//					File[] files= Files.walk(Paths.get(path))
-	//							//.filter(p -> p.toString().endsWith("xml")).distinct()
-	//							.filter(p -> p.toString().matches(listDir[i]+".xml")).distinct()
-	//							.map(Path::toFile)
-	//							.toArray(File[]::new);
-	//
-	//
-	//					for(int i=0;i<files.length;i++) {
-	//						dapetxml.add(files[i].toString());
-	//					}
-	//				}
-	//			}
-	//
-	//
-	//			//Split name each from folder name to find xml name
-	//			return listDir;
-	//
-	//		}
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//		public  String findXml(String path){
-	//			//files =new File[5];
-	//			ArrayList<String> dapetxml=new ArrayList<String>();
-	//			try {
-	//
-	//
-	//				//###############################################################################
-	//				//#https://stackoverflow.com/questions/46502937/arraystoreexception-when-trying-to-collect-files-into-array-via-files-walk?noredirect=1&lq=1   #
-	//				//###############################################################################	
-	//				File[] files= Files.walk(Paths.get(path))
-	//						.filter(p -> p.toString().endsWith("xml")).distinct()
-	//						.map(Path::toFile)
-	//						.toArray(File[]::new);
-	//
-	//
-	//				for(int i=0;i<files.length;i++) {
-	//					dapetxml.add(files[i].toString());
-	//				}
-	//
-	//
-	//
-	//				//###############################################################################
-	//				//#https://stackoverflow.com/questions/29574167/how-to-use-files-walk-to-get-a-graph-of-files-based-on-conditions   #
-	//				//###############################################################################	
-	//				//	Files.walk(Paths.get(path))
-	//				//    .filter(p -> p.toString().endsWith("xml")).distinct().forEach(System.out::println);
-	//				//		{
-	//				//			public boolean accept(File dir, String name)
-	//				//			{
-	//				//				return name.startsWith("temp") && name.endsWith(".txt");
-	//				//			}
-	//				//		});
-	//				//		if(matches.isEmpty(){
-	//				//				intln(matches.toString());
-	//				//			}
-	//				//		}
-	//				//		else {
-	//				//			System.out.println("not found");
-	//				//		}
-	//				//	}
-	//
-	//			}
-	//			catch (NullPointerException e){
-	//				System.out.println("Wrong path of directory ");
-	//			}
-	//			catch (IOException e){
-	//				System.out.println("dir not exist");
-	//			}
-	//			for(int i=0;i<dapetxml.size();i++) {
-	//				System.out.println("dapetxml"+i+":"+dapetxml.get(i));
-	//			}
-	//			return dapetxml.get(4);
-	//
-	//		}
-	//		public  String findCos(String path){
-	//
-	//			ArrayList<String> dapetcos=new ArrayList<String>();
-	//			try {
-	//
-	//
-	//				//###############################################################################
-	//				//#https://stackoverflow.com/questions/46502937/arraystoreexception-when-trying-to-collect-files-into-array-via-files-walk?noredirect=1&lq=1   #
-	//				//###############################################################################	
-	//				File[] files= Files.walk(Paths.get(path))
-	//						.filter(p -> p.toString().endsWith("cos")).distinct()
-	//						.map(Path::toFile)
-	//						.toArray(File[]::new);
-	//
-	//
-	//				for(int i=0;i<files.length;i++) {
-	//					dapetcos.add(files[i].toString());
-	//				}
-	//
-	//
-	//
-	//			}
-	//			catch (NullPointerException e){
-	//				System.out.println("Wrong path of directory ");
-	//			}
-	//			catch (IOException e){
-	//				System.out.println("dir not exist");
-	//			}
-	//			return dapetcos.get(0);
-	//		}
 
 	public static void main (String[] ar) throws IOException {
 		runPreTSX ins=new runPreTSX();
